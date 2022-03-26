@@ -17,7 +17,7 @@ def train(pth, imtype, datatype, real_data, Disc, Gen, nc, l, nz, sf):
     :param Gen:
     :param nc: channels
     :param l: image size
-    :param nz: latent vector size
+    :param nz: latent vector size   (z_channels)
     :param sf: scale factor for training data
     :return:
     """
@@ -33,7 +33,8 @@ def train(pth, imtype, datatype, real_data, Disc, Gen, nc, l, nz, sf):
     ## Constants for NNs
     matplotlib.use('Agg')
     ngpu = 1
-    num_epochs = 30
+    num_epochs = 10
+    # num_epochs = 30
 
     # batch sizes
     batch_size = 32
