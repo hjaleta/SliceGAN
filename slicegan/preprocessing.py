@@ -11,7 +11,7 @@ def batch(data,type,l, sf):
     :param sf: scale factor
     :return:
     """
-    Testing = True
+    Testing = False
     if type == 'png' or type == 'jpg':
         datasetxyz = []
         for img in data:
@@ -23,8 +23,8 @@ def batch(data,type,l, sf):
             phases = np.unique(img)
             data = np.empty([32 * 900, len(phases), l, l])
             for i in range(32 * 900):
-                x = np.random.randint(1, x_max - l-1)
-                y = np.random.randint(1, y_max - l-1)
+                x = np.random.randint(0, x_max - l)
+                y = np.random.randint(0, y_max - l)
                 # create one channel per phase for one hot encoding
                 for cnt, phs in enumerate(phases):
                     img1 = np.zeros([l, l])
@@ -33,7 +33,10 @@ def batch(data,type,l, sf):
 
             if Testing:
                 for j in range(7):
-                    plt.imshow(data[j, 0, :, :]+2*data[j, 1, :, :])
+                    plot_data = np.zeros((l,l))
+                    for i in range(phases-1):
+                        plot_data += i/phases*data[j, i, :, :]
+                    plt.imshow(plot_data)
                     plt.pause(0.3)
                     plt.show()
                     plt.clf()
@@ -126,7 +129,7 @@ def batch(data,type,l, sf):
                 subim = img[x:x + l, y:y + l]
                 data[i, 0, :, :] = subim
             if Testing:
-                for j in range(7):
+                for j in range(3):
                     plt.imshow(data[j, 0, :, :])
                     plt.pause(0.3)
                     plt.show()
