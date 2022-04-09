@@ -94,6 +94,8 @@ def trainCNet(datatype, realData, l, sf, CNet):
 
     print("Starting CNet Training...")
 
+    # realData = dataLoader.to(device)
+
     for e in range(numEpochs):
 
         minAr, maxAr = 100000, 0
@@ -102,29 +104,26 @@ def trainCNet(datatype, realData, l, sf, CNet):
         LList = []
 
         for R in dataLoader:
+
             # print(rData)
             print(f"\n {len(R)}")
-
+            # print(f"Type: {type(R)} Size: {R.size()}")
             R = R[0].to(device)
+            print(f"Type: {type(R)} Size: {R.size()}")
+            print(R)
+
             pred_OutR = cNet(R).view(-1)
 
-            print(f"Type: {type(R)} Size: {R.size()}")
+            # print(f"Type: {type(R)} Size: {R.size()}")
             util.test_plotter(R, 1, im_type, cpath, True)
+
             # R = R.cpu().detach().numpy()
             # print(R)
             # print(f"Type: {type(R)} Size: {R.shape}")
-            # cv2.imwrite("imageRR.png", R)
-            R_img = cv2.imread(cpath + "_slices.png")
+            # cv2.imwrite(f"{cpath}/imageRR.png", R)
+            R_img = cv2.imread(f"{cpath}_slices.png")
 
-            if e == 0:
-                real_OutR, min_area, max_area = numCircles(R_img, 1)
-
-                if min_area < minAr:
-                    minAr = min_area - 10
-                if max_area > maxAr:
-                    maxAr = max_area + 10
-            else:
-                real_OutR = numCircles(R_img, 2, minAr, maxAr)
+            real_OutR = numCircles(R_img)
 
             predR, realR = int(pred_OutR), int(real_OutR)
 
@@ -132,11 +131,11 @@ def trainCNet(datatype, realData, l, sf, CNet):
 
             print(f"Epoch {e} : Slice {iterc} - NRC {realR} NPR {predR} Diff {predR - realR}\n")
 
-            cLoss = (pred_OutR - real_OutR)**2 if pred_OutR > real_OutR else 0
+            cLoss = (pred_OutR - real_OutR)**2
             LList.append(cLoss)
 
-        if e == 0:
-            print(f"\n\n Circle Area Thresholds: minArea = {minAr} & maxArea = {maxAr} \n\n")
+        # if e == 0:
+        #     print(f"\n\n Circle Area Thresholds: minArea = {minAr} & maxArea = {maxAr} \n\n")
 
         lsum = 0
         for ll in LList:
@@ -210,15 +209,21 @@ def numCircles(slice_i, area_find = 3, MinArea = 0, MaxArea = 100):
         return len(keypoints)
 
     else:
+
         detector = cv2.SimpleBlobDetector_create(params)
+
         keypoints = detector.detect(slice_i)
-        print(f"Number of detected circles is: {len(keypoints)}\nPress any key on the plot to continue.\n")
 
-        im_with_keypoints = cv2.drawKeypoints(slice_i, keypoints, np.array([]), (0, 0, 255),
-                                              cv2.DRAW_MATCHES_FLAGS_DRAW_RICH_KEYPOINTS)
+        if area_find == 4:
+            print(f"Number of detected circles is: {len(keypoints)}\nPress any key on the plot to continue.\n")
 
-        cv2.imshow("Keypoints", im_with_keypoints)
-        cv2.waitKey(0)
+            im_with_keypoints = cv2.drawKeypoints(slice_i, keypoints, np.array([]), (0, 0, 255),
+
+                                                  cv2.DRAW_MATCHES_FLAGS_DRAW_RICH_KEYPOINTS)
+
+            cv2.imshow("Keypoints", im_with_keypoints)
+
+            cv2.waitKey(0)
 
         return len(keypoints)
 
