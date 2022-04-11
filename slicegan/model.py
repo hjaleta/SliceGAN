@@ -1,4 +1,3 @@
-from run_slicegan import dk, ds, dp, df
 from slicegan import preprocessing, util, Circularity
 import torch
 import torch.nn as nn
@@ -6,10 +5,7 @@ import torch.backends.cudnn as cudnn
 import torch.optim as optim
 import time
 import matplotlib
-import cv2
-import torch.nn.functional as F
-import pickle
-from cv2 import SimpleBlobDetector
+
 
 def train(pth, imtype, datatype, real_data, Disc, Gen, nc, l, nz, sf, lz, num_epochs, CircNet = 2, evall = True):
     """
