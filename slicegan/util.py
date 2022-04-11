@@ -23,12 +23,12 @@ def mkdr(proj,proj_dir,Training):
     if Training:
         try:
             os.mkdir(pth)
-            return pth + '/' + proj
+            return pth
         except FileExistsError:
             print('Directory', pth, 'already exists. Enter new project name or hit enter to overwrite')
             new = input()
             if new == '':
-                return pth + '/' + proj
+                return pth
             else:
                 pth = mkdr(new, proj_dir, Training)
                 return pth
@@ -36,7 +36,7 @@ def mkdr(proj,proj_dir,Training):
             print('The specifified project directory ' + proj_dir + ' does not exist. Please change to a directory that does exist and again')
             sys.exit()
     else:
-        return pth + '/' + proj
+        return pth
 
 
 def weights_init(m):
@@ -120,7 +120,7 @@ def post_proc(img,imtype):
         pass
     # for n phase materials, seperate out the channels and take the max
     if imtype == 'twophase':
-        print(f"\nImage Shape before 2phase convert = {img.shape}\np1 = {img} \nImage p1 = {np.array(img[0][1]).shape}")
+        print(f"\nImage Shape before 2phase convert = {img.shape}\nImage p1 = {np.array(img[0][1]).shape}")
         img_pp = np.zeros(img.shape[2:])
         p1 = np.array(img[0][0])
         p2 = np.array(img[0][1])

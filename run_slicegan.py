@@ -74,9 +74,9 @@ img_dir = 'img'
 Circle_path = util.mkdr(Project_name, Circle_dir, W_dir)
 blob_path = util.mkdr(Project_name, Circle_dir, img_dir)
 # Test efficacy of Blob Detector on Real Image
-
-imm = util.testCircleDetector(data_path, blob_path)
-ts = Circularity.numCircles(imm)
+#
+# imm = util.testCircleDetector(data_path, blob_path)
+# ts = Circularity.numCircles(imm)
 
 ## Create and Train CircleNet
 
@@ -86,8 +86,8 @@ Circularity.trainCNet(data_type, data_path, img_size, scale_factor, circleNet)
 Circularity.CircleWeights(circleNet, Circle_path, True)
 
 ## Create GAN
-
-circleNet = Circularity.CircleWeights(circleNet, Circle_path, False)
+#
+# circleNet = Circularity.CircleWeights(circleNet, Circle_path, False)
 
 netD, netG = networks.slicegan_nets(**net_params)
 # netD, netG = networks.slicegan_nets(Project_path, Training, image_type, dk, ds, df, dp, gk, gs, gf, gp)
