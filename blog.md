@@ -1,7 +1,7 @@
 # Group 81 Blog Post
 # Generating three-dimensional structures from a two-dimensional slice with generative adversarial network-based dimensionality expansion
 
-J. IJpma -4477103, R. Jense -4565541, H. Lindstedt -* and A. Sharma -5579139
+J. IJpma -4477103, R. Jense -4565541, H. Lindstedt -5621313 and A. Sharma -5579139
 D.J.IJpma@student.tudelft.nl, R.E.Jense@student.tudelft.nl, H.L.M.Lindstedt@student.tudelft.nl, A.Sharma-53@student.tudelft.nl
 
 
