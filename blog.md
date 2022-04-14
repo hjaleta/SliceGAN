@@ -80,6 +80,19 @@ Figure 6 shows the Wasserstein loss of the network for the different beta1 and b
 *Figure 6. the Wasserstein Loss for the real and generated images. The loss for beta1 (left)
 suggest no real preference for lower values. Beta2 (right), however seems to work better with lower values for this network* 
 
+## Different Noise Distributions
+Another thing that we examined was how the performance of the GAN depends on the noise distributions that we use when sampling z. When not stated otherwise, for example in the training of the CircleNet and the hyperparameter tuning, we have used gaussian noise from a normal distribution. In this part, we wanted to see how the network learns when using other sources of noise. The distributions we used were:
+* Cauchy
+* Laplace
+* Uniform
+* Exponential
+
+Different generators were hence trained on these distributions, and then evaluated on the same. The different results can be seen below:
+
+
+The Cauchy distribution is the most well behaved, some fibers are properly separated and others more cluttered together. With the uniformly distributed noise, almost all fibers are cluttered together, which is obviously a less accurate generation. The exponential and laplace noise however, are completely rubbish. We can distinguish some fibers, but way fewer than in the training data. Also their sizes and shapes are not very satisfying.
+
+
 ## Conclusion
 
 We implement 7 main things in this reproducibility project (as part of the CS4240 Deep Learning course):-
