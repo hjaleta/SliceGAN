@@ -1,5 +1,8 @@
 import os
+
+import cv2
 from torch import nn
+from slicegan import util
 import torch
 from torch import autograd
 import numpy as np
@@ -8,7 +11,7 @@ import tifffile
 import sys
 ## Training Utils
 
-def mkdr(proj,proj_dir,Training):
+def mkdr(proj_dir, proj, Training):
     """
     When training, creates a new project directory or overwrites an existing directory according to user input. When testing, returns the full project path
     :param proj: project name
@@ -20,20 +23,20 @@ def mkdr(proj,proj_dir,Training):
     if Training:
         try:
             os.mkdir(pth)
-            return pth + '/' + proj
+            return pth + '/'
         except FileExistsError:
             print('Directory', pth, 'already exists. Enter new project name or hit enter to overwrite')
             new = input()
             if new == '':
-                return pth + '/' + proj
+                return pth + '/'
             else:
-                pth = mkdr(new, proj_dir, Training)
-                return pth
+                pth = mkdr(proj_dir, new, Training)
+                return pth + '/'
         except FileNotFoundError:
             print('The specifified project directory ' + proj_dir + ' does not exist. Please change to a directory that does exist and again')
             sys.exit()
     else:
-        return pth + '/' + proj
+        return pth + '/'
 
 
 def weights_init(m):
@@ -72,7 +75,7 @@ def calc_gradient_penalty(netD, real_data, fake_data, batch_size, l, device, gp_
     interpolates.requires_grad_(True)
 
     #pass interpolates through netD
-    disc_interpolates = netD(interpolates)
+    disc_interpolates = netD(interpolates)  # passing through the network
     gradients = autograd.grad(outputs=disc_interpolates, inputs=interpolates,
                               grad_outputs=torch.ones(disc_interpolates.size(), device = device),
                               create_graph=True, only_inputs=True)[0]
@@ -117,10 +120,12 @@ def post_proc(img,imtype):
         pass
     # for n phase materials, seperate out the channels and take the max
     if imtype == 'twophase':
+        # print(f"\nImage Shape before 2phase convert = {img.shape}\np1 = {img} \nImage p1 = {np.array(img[0][1]).shape}")
         img_pp = np.zeros(img.shape[2:])
         p1 = np.array(img[0][0])
         p2 = np.array(img[0][1])
         img_pp[(p1 < p2)] = 1  # background, yellow
+        # print(img_pp.shape)
         return img_pp
     if imtype == 'threephase':
         img_pp = np.zeros(img.shape[2:])
@@ -137,7 +142,7 @@ def post_proc(img,imtype):
     if imtype == 'grayscale':
         return 255*img[0][0]
 
-def test_plotter(img,slcs,imtype,pth):
+def test_plotter(img,slcs,imtype,pth, circ=False):
     """
     creates a fig with 3*slc subplots showing example slices along the three axes
     :param img: raw input image
@@ -145,25 +150,37 @@ def test_plotter(img,slcs,imtype,pth):
     :param imtype: image type
     :param pth: where to save plot
     """
+
     img = post_proc(img,imtype)
-    fig, axs = plt.subplots(slcs, 3)
-    if imtype == 'colour':
-        for j in range(slcs):
-            axs[j, 0].imshow(img[j, :, :, :], vmin = 0, vmax = 255)
-            axs[j, 1].imshow(img[:, j, :, :],  vmin = 0, vmax = 255)
-            axs[j, 2].imshow(img[:, :, j, :],  vmin = 0, vmax = 255)
-    elif imtype == 'grayscale':
-        for j in range(slcs):
-            axs[j, 0].imshow(img[j, :, :], cmap = 'gray')
-            axs[j, 1].imshow(img[:, j, :], cmap = 'gray')
-            axs[j, 2].imshow(img[:, :, j], cmap = 'gray')
+
+    if circ:
+        # print('(if circl == true )saving png in test_plotter...')
+        # fig, ax = plt.subplots(slcs)
+        # # for j in range(slcs):
+        # #     axs[j, 0].imshow(img[j, :, :])
+        # plt.savefig(pth + '_slices.png')
+        # plt.close()
+        plt.imsave(pth +'_slices.png', img)
     else:
-        for j in range(slcs):
-            axs[j, 0].imshow(img[j, :, :])
-            axs[j, 1].imshow(img[:, j, :])
-            axs[j, 2].imshow(img[:, :, j])
-    plt.savefig(pth + '_slices.png')
-    plt.close()
+
+        fig, axs = plt.subplots(slcs, 3)
+        if imtype == 'colour':
+            for j in range(slcs):
+                axs[j, 0].imshow(img[j, :, :, :], vmin = 0, vmax = 255)
+                axs[j, 1].imshow(img[:, j, :, :],  vmin = 0, vmax = 255)
+                axs[j, 2].imshow(img[:, :, j, :],  vmin = 0, vmax = 255)
+        elif imtype == 'grayscale':
+            for j in range(slcs):
+                axs[j, 0].imshow(img[j, :, :], cmap = 'gray')
+                axs[j, 1].imshow(img[:, j, :], cmap = 'gray')
+                axs[j, 2].imshow(img[:, :, j], cmap = 'gray')
+        else:
+            for j in range(slcs):
+                axs[j, 0].imshow(img[j, :, :])
+                axs[j, 1].imshow(img[:, j, :])
+                axs[j, 2].imshow(img[:, :, j])
+        plt.savefig(pth + '_slices.png')
+        plt.close()
 
 def graph_plot(data,labels,pth,name):
     """
@@ -175,14 +192,15 @@ def graph_plot(data,labels,pth,name):
     :return:
     """
 
-    for datum,lbl in zip(data,labels):
-        plt.plot(datum, label = lbl)
+    for datum, lbl in zip(data, labels):
+        plt.plot(datum, label=lbl)
+
     plt.legend()
     plt.savefig(pth + '_' + name)
     plt.close()
 
 
-def test_img(pth, imtype, netG, nz = 64, lf = 4, periodic=False):
+def test_img(pth, imtype, netG, nz = 64, lf = 4, periodic=False, noise_type=None):
     """
     saves a test volume for a trained or in progress of training generator
     :param pth: where to save image and also where to find the generator
@@ -194,7 +212,7 @@ def test_img(pth, imtype, netG, nz = 64, lf = 4, periodic=False):
     :param periodic: list of periodicity in axis 1 through n
     :return:
     """
-    netG.load_state_dict(torch.load(pth + '_Gen.pt'))
+    netG.load_state_dict(torch.load(pth + '_Gen.pt', map_location=torch.device("cpu")))
     netG.eval()
     noise = torch.randn(1, nz, lf, lf, lf)
     if periodic:
@@ -219,9 +237,28 @@ def test_img(pth, imtype, netG, nz = 64, lf = 4, periodic=False):
 
     return tif, raw, netG
 
+def testCircleDetector(pathy, p2):
 
+    image = np.array(tifffile.imread(pathy[0]))
+    print(f"Image Shape: {image.shape}")
 
+    image = image[0,:,:]
+    valys = np.unique(image)
 
+    # y = np.random.randint(0, 915)
+    # z = np.random.randint(0, 915)
+    ims = 916
+    data = np.empty([1, len(valys), ims, ims])
 
+    for cnt, phs in enumerate(list(valys)):
+        img1 = np.zeros([ims, ims])
+
+        img1[image[:, :] == phs] = 1
+        data[0, cnt, :, :] = img1[:, :]
+    util.test_plotter(data, 1, "twophase", p2, True)
+
+    imgf = cv2.imread(p2 + "_slices.png")
+
+    return imgf
 
 

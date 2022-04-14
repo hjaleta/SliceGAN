@@ -2,7 +2,7 @@ import numpy as np
 import torch
 import matplotlib.pyplot as plt
 import tifffile
-def batch(data,type,l, sf):
+def batch(data,type,l, sf, sub_images = 32*900):
     """
     Generate a batch of images randomly sampled from a training microstructure
     :param data: data path
@@ -11,7 +11,7 @@ def batch(data,type,l, sf):
     :param sf: scale factor
     :return:
     """
-    Testing = True
+    Testing = False
     if type == 'png' or type == 'jpg':
         datasetxyz = []
         for img in data:
@@ -21,10 +21,10 @@ def batch(data,type,l, sf):
             img = img[::sf,::sf]
             x_max, y_max= img.shape[:]
             phases = np.unique(img)
-            data = np.empty([32 * 900, len(phases), l, l])
-            for i in range(32 * 900):
-                x = np.random.randint(1, x_max - l-1)
-                y = np.random.randint(1, y_max - l-1)
+            data = np.empty([sub_images, len(phases), l, l])
+            for i in range(sub_images):
+                x = np.random.randint(0, x_max - l)
+                y = np.random.randint(0, y_max - l)
                 # create one channel per phase for one hot encoding
                 for cnt, phs in enumerate(phases):
                     img1 = np.zeros([l, l])
@@ -33,7 +33,10 @@ def batch(data,type,l, sf):
 
             if Testing:
                 for j in range(7):
-                    plt.imshow(data[j, 0, :, :]+2*data[j, 1, :, :])
+                    plot_data = np.zeros((l,l))
+                    for i in range(phases-1):
+                        plot_data += i/phases*data[j, i, :, :]
+                    plt.imshow(plot_data)
                     plt.pause(0.3)
                     plt.show()
                     plt.clf()
@@ -50,10 +53,10 @@ def batch(data,type,l, sf):
         x_max, y_max, z_max = img.shape[:]
         print('training image shape: ', img.shape)
         vals = np.unique(img)
-        for dim in range(3):
-            data = np.empty([32 * 900, len(vals), l, l])
+        for dim in range(3): # change back to 3
+            data = np.empty([sub_images, len(vals), l, l])
             print('dataset ', dim)
-            for i in range(32*900):
+            for i in range(sub_images):
                 x = np.random.randint(0, x_max - l)
                 y = np.random.randint(0, y_max - l)
                 z = np.random.randint(0, z_max - l)
@@ -87,10 +90,9 @@ def batch(data,type,l, sf):
         for img in data:
             img = plt.imread(img)
             img = img[::sf,::sf,:]
-            ep_sz = 32 * 900
-            data = np.empty([ep_sz, 3, l, l])
+            data = np.empty([sub_images, 3, l, l])
             x_max, y_max = img.shape[:2]
-            for i in range(ep_sz):
+            for i in range(sub_images):
                 x = np.random.randint(0, x_max - l)
                 y = np.random.randint(0, y_max - l)
                 # create one channel per phase for one hot encoding
@@ -119,8 +121,8 @@ def batch(data,type,l, sf):
             img = img/img.max()
             img = img[::sf, ::sf]
             x_max, y_max = img.shape[:]
-            data = np.empty([32 * 900, 1, l, l])
-            for i in range(32 * 900):
+            data = np.empty([sub_images, 1, l, l])
+            for i in range(sub_images):
                 x = np.random.randint(1, x_max - l - 1)
                 y = np.random.randint(1, y_max - l - 1)
                 subim = img[x:x + l, y:y + l]
@@ -136,5 +138,3 @@ def batch(data,type,l, sf):
             dataset = torch.utils.data.TensorDataset(data)
             datasetxyz.append(dataset)
     return datasetxyz
-
-
