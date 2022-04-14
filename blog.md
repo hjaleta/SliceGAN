@@ -18,22 +18,22 @@ The main purpose of SliceGAN is to resolve this dimensional incompatibility betw
 The source data is from  (discuss origin and 3D training not being widely available)
 ![Figure 2](figures/data.png?raw=true)
 
-##Preprocessing
+## Preprocessing
 The first step to training any kind of model is applying transformations to the raw data set such that it can be accepted as input by the model. For SliceGAN this process involves trimming the raw data, processing it into a binary format and applying some cleanup on small artifacts within the image.
 
-###Slicing Images. 
+### Slicing Images. 
 More often than not a model is not trained on a full image, but rather on an area that carries more relevance for its use case. This, together with scaling the image, leads to a massive performance boost as the complexity of the eventual input is significantly reduced. The raw input is transformed into a set of slices.
 
-###Image Labeling. 
+### Image Labeling. 
 The two-dimensional slice carries no contextual information yet. The slice is transformed to its respective binary file type in a One Hot Encoding. It is nearly ready to be used for generating structures. 
 
-###Artifact Cleaning. 
+### Artifact Cleaning. 
 The image is pushed through a small image processing pipeline. First, a morphological closing is applied to close gaps between the borders of our structure slice. Second, some noise on the background is removed as this should not contribute to the output. Lastly, some small holes in the objects are closed up to ensure the volume is solid.
 
 Every raw image has now been processed into a square and denoised image and is suitable for training. The final training data, viewed from different angles, can be seen below.
 ![Figure 3](figures/slices.png?raw=true)
 
-##CircleNet
+## CircleNet
 
 An interesting field within Deep Learning is Physically Informed Neural Networks, or PINN. These networks aim to model some physical behavior by incorporating a special term in their loss function, with the aim of better capturing some underlying laws of the problem we are facing. 
         
@@ -53,7 +53,7 @@ Notice that unlike the loss used in Circle Training, the “Circularity Loss” 
 
 One issue we faced while implementing this is that the real data our network is trained on also contains a lot of artifacts and distortions that affects our learning capability for  modular nodes with high circularity. The biggest problem here is that the subsections of these structures contain a lot of small noise artifacts and a lot of our circular fiber cross-sections are connected to each other due to some inherent error in the conversion from grayscale to binary. We apply water-shedding to mitigate these issues and compare our results of the CircleNet before and after water-shedding to compare the efficacy of our pre-processing measure. 
 
-##A Closer Look on the Forward Pass
+## A Closer Look on the Forward Pass
 One thing discussed in the original paper is the noise seed z that we pass to the generator. In the paper, the released code, and all our training instances, a 16 * 4 * 4 * 4 array with random noise was used. The first dimension involves different channels, and the last 3 are spatial. Multiple transpose convolutions are used to go from a spatial extension of 4*4*4 to 64*64*64. These operations are, as normal convolutions, dependent on stride, kernel size and padding, s, k & p. (For more exact details on this, please refer to the original paper.)
 When choosing s < k we impose kernel overlap. This means that the “influential fields” emanating from the different seeds overlap with each other. One can think of it as the opposite of a receptive field. This property is important for the continuity properties of generated fibers. If we instead had k = s, all seeds would have an independent contribution to the volume. One can think of it all seeds generating a 16^3 cube, which we then glue together. Now, when there is overlap, we find better continuity properties.
 Another cool feature that comes with this way of learning continuity, is that we can make bigger forward passes than the model was trained on. When giving a noise seed of different size, for example 16 *9^3 we generate a volume of size 224^3! This can be compared with the original size 64^3 which the network was trained to generate. Both can be seen below. Note that the 64^3 is much more zoomed in.
