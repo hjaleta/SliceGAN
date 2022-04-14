@@ -1,7 +1,6 @@
 local_stuff/
 TrainingData/GFRP_Static_600N/
 TrainingData/
-Trained_Generators/
 .idea
 Examples/
 Examples/3D_data_binary.tif
