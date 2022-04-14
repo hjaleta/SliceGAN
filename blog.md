@@ -1,4 +1,4 @@
-# Group 81 blog post
+# Group 81 Blog Post
 # Generating three-dimensional structures from a two-dimensional slice with generative adversarial network-based dimensionality expansion
 
 J. IJpma, R. Jense, H. Lindstedt and A. Sharma
@@ -62,10 +62,10 @@ When choosing s < k we impose kernel overlap. This means that the “influential
 Another cool feature that comes with this way of learning continuity, is that we can make bigger forward passes than the model was trained on. When giving a noise seed of different size, for example 16 *9^3 we generate a volume of size 224^3! This can be compared with the original size 64^3 which the network was trained to generate. Both can be seen below. Note that the 64^3 is much more zoomed in.
 
 ![Figure 4](figures/forward_pass_slices.png?raw=true)
-*Figure 4.*
+*Figure 4. Subsection Slices across all three planes for the generated 3D Volume of size 224x224x224*
 
 ![Figure 5](figures/forward_pass_slices2.png?raw=true)
-*Figure 5.*
+*Figure 5. Subsection Slices across all three planes for the originally generated 3D Volume of size 64x64x64*
 
 ## Hyperparameter Tuning
 
@@ -76,12 +76,29 @@ We trained the GAN with beta1 values [0, 0.2, 0.5, 0.8, 0.9] keeping beta2 fixed
 Figure 6 depicts the Discriminator loss for the real and generated samples for each of the beta values. The graph shows the average of every thirty samples for clarity, since the original losses are too noisy to make a clear comparison.
 
 ![Figure 6](figures/Graphs_disc_loss_real_fake_hp_tuning.png?raw=true)
-*Figure 6. The Discriminator loss for the real and generated images. *
+*Figure 6. The Discriminator loss for the real and generated images.*
 
 Figure 7 shows the Wasserstein loss of the network for the different beta1 and beta2 values. The graphs suggest that especially for beta2 lower values might be better, seeing as they result in a lower loss. However, since the network was only trained for 10 epochs it might be that the higher values of beta2 result in better performance after longer training runs. 
 
 ![Figure 6](figures/beta12_wass_Loss_Graph.png?raw=true)
-*Figure 7.* 
+*Figure 7. the Wasserstein Loss for the real and generated images.* 
+
+## Conclusion
+
+We implement 7 main things in this reproducibility project (as part of the CS4240 Deep Learning course):-
+
+1. Trained and Ran the existing framework on new data
+2. Optimized the existing code and accompanying framework by adding helper functions and pre-computed parameters for convolution
+3. Evaluated the existing framework by changing the values of beta1 and beta2 (trying 5 values each) for the adams optimizer for both the networks
+4. Adjusted the convolution framework such that a 3D structure of any desired dimensions can be obtained from the generator
+5. Implemented a custom loss function to induce higher circularity in fibers by creating, training, optimizing, and incorporating a convolutional neural network- CircleNet
+6. Observed the different results which may be obtained by changing the distribution from which our random variables are sampled for the generator noise seed.
+7. Added preprocessing centered around water-shedding to clean the noise in the inout samples and further optimize the results for the CircleNet.
+
+## Appendix
+
+For keeping the blog post uncluttered, we only included a few of the figures, images, and graphs that were generated. However, should the reader wish to take a look at the extensive results, or recreate the results themselves using the stored weights, they can access these files by going through the subdirectories in the 'Trained_Generators' directory. 
+
 ## References
 
 [1]  Kench, S., Cooper, S.J. Generating three-dimensional structures from a two-dimensional slice with generative adversarial network-based dimensionality expansion. Nat Mach Intell 3, 299–305 (2021), https://doi.org/10.1038/s42256-021-00322-1
