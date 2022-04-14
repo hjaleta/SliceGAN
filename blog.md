@@ -1,4 +1,4 @@
-# Group 81 blog post
+# Group 81 Blog Post
 # Generating three-dimensional structures from a two-dimensional slice with generative adversarial network-based dimensionality expansion
 
 J. IJpma, R. Jense, H. Lindstedt and A. Sharma
@@ -8,15 +8,18 @@ J. IJpma, R. Jense, H. Lindstedt and A. Sharma
 Material science is a vast topic of research today, and it’s not very surprising - Almost every product you can think of is made out of some material! One family of materials are the so called composites. Composites are materials that on a microscopical level consist of 2 or more different “pure” materials. One of the more famous composites is carbon fiber materials. Here, fibers of carbon are embedded into a plastic polymer, similar to how concrete can be reinforced with steel bars. The fibers give the material strength, whereas the polymer provides the structure. Carbon fiber materials are used in a vast range of applications, like airplanes and bikes. When studying the properties of these materials, simulations are often used. However, generating the desired 3D structures can be computationally costly. This is where the paper we worked with in this project comes into the picture.
 
 ![Figure 1](figures/Carbon_fibre_usage.png?raw=true)
-
+*Figure 1. Example of the many uses of carbon fiber*
 ## Original Paper
-The paper Generating three-dimensional structures from a two-dimensional slice with generative adversarial network-based dimensionality expansion was published in Nature Machine Intelligence in April 2021. In this paper, Steven Kench and Samuel J. Cooper introduced SliceGAN, a GAN that generates 3D micro structures. In general, obtaining 3D training data can be hard. To build a full 3D volume can take a long time with for example spectroscopy. Furthermore, when training a GAN with 3D data the memory consumption can quickly grow large. It is therefore often more convenient to work with 2D images. 
+The paper Generating three-dimensional structures from a two-dimensional slice with generative adversarial network-based dimensionality expansion was published in Nature Machine Intelligence in April 2021. In this paper, Steven Kench and Samuel J. Cooper introduced SliceGAN, a GAN that generates 3D micro-structures from 2D training slices. In general, obtaining 3D training data can be hard. To build a full 3D volume can take a long time with for example spectroscopy. Furthermore, when training a GAN with 3D data the memory consumption can quickly grow large. It is therefore often more convenient to work with 2D images. 
 
 The main purpose of SliceGAN is to resolve this dimensional incompatibility between training data and generated data. This is done by using a generator that produces 3D volumes, but discriminators which classify 2D images. It does this by slicing out images from the generated volume perpendicular to the x-, y- or z-axis. These slices are then passed to three Discriminators. Each of the Discriminators tries to distinguish real and generated slices corresponding to one of the different directions in the material. In case the microstructure is isotropic (meaning it looks the same from all three directions), one Discriminator suffices. A Wasserstein loss is used during training. In the paper, many different materials are tested, like battery cathodes and ceramics. In this project however, we focus on the aforementioned carbon fibers.
 
 ## Source Data
-The source data is from  (discuss origin and 3D training not being widely available)
+The source data is obtained from the work of Emerson et al. [2]. 
+We encountered a lot of roadblocks while trying to obtain a data sample to train our network on. This was mostly due to a general scarcity of 3D data available online, especially for our case. We crop the original dataset perpendicular to the x-axis which displays the circular cross-section of these fibers such that the entire slice contains the fiber cross-sections in order to save memory during the implementation of our version of SliceGAN.
+
 ![Figure 2](figures/data.png?raw=true)
+*Figure 2. Samples of glass fibre-epoxy composite data*
 
 ## Preprocessing
 The first step to training any kind of model is applying transformations to the raw data set such that it can be accepted as input by the model. For SliceGAN this process involves trimming the raw data, processing it into a binary format and applying some cleanup on small artifacts within the image.
@@ -32,12 +35,12 @@ The image is pushed through a small image processing pipeline. First, a morpholo
 
 Every raw image has now been processed into a square and denoised image and is suitable for training. The final training data, viewed from different angles, can be seen below.
 ![Figure 3](figures/slices.png?raw=true)
-
+*Figure 3. Denoised slices of concateted data*
 ## CircleNet
 
 An interesting field within Deep Learning is Physically Informed Neural Networks, or PINN. These networks aim to model some physical behavior by incorporating a special term in their loss function, with the aim of better capturing some underlying laws of the problem we are facing. 
         
-In our case, with the help of Professor Baris, we recognised that one physical property that is desired in this spatial generation of carbon fibers is their circularity. We note that an issue with SliceGan producing carbon structures is that if we observe the generated structure along the x-direction, the circularity of generated cross-sections is less than that of our (/distorted as compared to our) original data.
+In our case, with the help of Professor Dr. Bariș Çağlar (from the faculty of Aerospace Engineering at TU Delft), we recognised that one physical property that is desired in this spatial generation of carbon fibers is their circularity. We note that an issue with SliceGan producing carbon structures is that if we observe the generated structure along the x-direction, the circularity of generated cross-sections is less than that of our (/distorted as compared to our) original data.
 
 Therefore, we decide to use a custom loss function which enforces a loss pertaining to the circularity of the fibers.
         
@@ -57,8 +60,12 @@ One issue we faced while implementing this is that the real data our network is 
 One thing discussed in the original paper is the noise seed z that we pass to the generator. In the paper, the released code, and all our training instances, a 16 * 4 * 4 * 4 array with random noise was used. The first dimension involves different channels, and the last 3 are spatial. Multiple transpose convolutions are used to go from a spatial extension of 4*4*4 to 64*64*64. These operations are, as normal convolutions, dependent on stride, kernel size and padding, s, k & p. (For more exact details on this, please refer to the original paper.)
 When choosing s < k we impose kernel overlap. This means that the “influential fields” emanating from the different seeds overlap with each other. One can think of it as the opposite of a receptive field. This property is important for the continuity properties of generated fibers. If we instead had k = s, all seeds would have an independent contribution to the volume. One can think of it all seeds generating a 16^3 cube, which we then glue together. Now, when there is overlap, we find better continuity properties.
 Another cool feature that comes with this way of learning continuity, is that we can make bigger forward passes than the model was trained on. When giving a noise seed of different size, for example 16 *9^3 we generate a volume of size 224^3! This can be compared with the original size 64^3 which the network was trained to generate. Both can be seen below. Note that the 64^3 is much more zoomed in.
+
 ![Figure 4](figures/forward_pass_slices.png?raw=true)
+*Figure 4. Subsection Slices across all three planes for the generated 3D Volume of size 224x224x224*
+
 ![Figure 5](figures/forward_pass_slices2.png?raw=true)
+*Figure 5. Subsection Slices across all three planes for the originally generated 3D Volume of size 64x64x64*
 
 ## Hyperparameter Tuning
 
@@ -66,15 +73,39 @@ SliceGAN has many hyperparameters, from the amount of layers, the type of loss f
 The reason for looking further into the beta1 and beta2 values for the Adam optimizer is that the implementation from the original paper uses 0 as value for beta1. This means that the network is not using the bias in the  first moment estimate. This is remarkable since the default is to use .9 for beta1 and .99 for beta2 as recommended by the paper that introduced Adam. [reference]
 We trained the GAN with beta1 values [0, 0.2, 0.5, 0.8, 0.9] keeping beta2 fixed at 0.9 (as was used in the paper) and for beta2 we used the values [0.1, 0.3, 0.5, 0.9] keeping beta1 fixed as 0.
 
-Figure x depicts the Discriminator loss for the real and generated samples for each of the beta values. The graph shows the average of every thirty samples for clarity, since the original losses are too noisy to make a clear comparison.
-
-Figure y shows the Wasserstein loss of the network for the different beta1 and beta2 values. The graphs suggest that especially for beta2 lower values might be better, seeing as they result in a lower loss. However, since the network was only trained for 10 epochs it might be that the higher values of beta2 result in better performance after longer training runs. 
+Figure 6 depicts the Discriminator loss for the real and generated samples for each of the beta values. The graph shows the average of every thirty samples for clarity, since the original losses are too noisy to make a clear comparison.
 
 ![Figure 6](figures/Graphs_disc_loss_real_fake_hp_tuning.png?raw=true)
+*Figure 6. The Discriminator loss for the real and generated images.*
+
+Figure 7 shows the Wasserstein loss of the network for the different beta1 and beta2 values. The graphs suggest that especially for beta2 lower values might be better, seeing as they result in a lower loss. However, since the network was only trained for 10 epochs it might be that the higher values of beta2 result in better performance after longer training runs. 
+
 ![Figure 6](figures/beta12_wass_Loss_Graph.png?raw=true)
+*Figure 7. the Wasserstein Loss for the real and generated images.* 
+
+## Conclusion
+
+We implement 7 main things in this reproducibility project (as part of the CS4240 Deep Learning course):-
+
+1. Trained and Ran the existing framework on new data
+2. Optimized the existing code and accompanying framework by adding helper functions and pre-computed parameters for convolution
+3. Evaluated the existing framework by changing the values of beta1 and beta2 (trying 5 values each) for the adams optimizer for both the networks
+4. Adjusted the convolution framework such that a 3D structure of any desired dimensions can be obtained from the generator
+5. Implemented a custom loss function to induce higher circularity in fibers by creating, training, optimizing, and incorporating a convolutional neural network- CircleNet
+6. Observed the different results which may be obtained by changing the distribution from which our random variables are sampled for the generator noise seed.
+7. Added preprocessing centered around water-shedding to clean the noise in the inout samples and further optimize the results for the CircleNet.
+
+## Appendix
+
+For keeping the blog post uncluttered, we only included a few of the figures, images, and graphs that were generated. However, should the reader wish to take a look at the extensive results, or recreate the results themselves using the stored weights, they can access these files by going through the subdirectories in the 'Trained_Generators' directory. 
+
 ## References
 
-[1]  S. Kench and S. J. Cooper, Generating three-dimensional structures from a
-two-dimensional slice with generative adversarial
-network-based dimensionality expansion
+[1]  Kench, S., Cooper, S.J. Generating three-dimensional structures from a two-dimensional slice with generative adversarial network-based dimensionality expansion. Nat Mach Intell 3, 299–305 (2021), https://doi.org/10.1038/s42256-021-00322-1
+
+[2] Monica J. Emerson, Vedrana A. Dahl, Knut Conradsen, Lars P. Mikkelsen, Anders B. Dahl,
+A multimodal data-set of a unidirectional glass fibre reinforced polymer composite,
+Volume 18, 2018, Pages 1388-1393, https://doi.org/10.1016/j.dib.2018.04.039.
+
+[3] Diederik P. Kingma and Jimmy Lei Ba,  “ADAM: A METHOD FOR STOCHASTIC OPTIMIZATION”, Arxiv 2014, https://arxiv.org/pdf/1412.6980.pdf, https://doi.org/10.48550/ARXIV.1412.6980
 

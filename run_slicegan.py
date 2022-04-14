@@ -133,14 +133,14 @@ for index, beta in enumerate(betas):
 
         # if reusing weights
         if use_Circ == 1:
-            circleNet = Circularity.CircleWeights(circleNet, circle_path, False)
+            print(f"Running SliceGAN with trained CircleNet")
             # print('Uncomment CNet')
         # If training circlenet
         if use_Circ == 2:
-
+            print(f"Training CircleNet before usage in SliceGAN")
             util.mkdr(project_path, circle_dir, 1)
             Circularity.trainCNet(data_type, data_path, img_size, scale_factor, circleNet, project_path)
-            Circularity.CircleWeights(circleNet, circle_path, True)
+            # Circularity.CircleWeights(circleNet, circle_path, True)
 
 
 
