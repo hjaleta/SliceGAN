@@ -89,6 +89,12 @@ Another thing that we examined was how the performance of the GAN depends on the
 
 Different generators were hence trained on these distributions, and then evaluated on the same. The different results can be seen below:
 
+![Figure 7](figures/noise1.png?raw=true)
+![Figure 7](figures/noise2.png?raw=true)
+![Figure 7](figures/noise3.png?raw=true)
+![Figure 7](figures/noise4.png?raw=true)
+
+
 
 The Cauchy distribution is the most well behaved, some fibers are properly separated and others more cluttered together. With the uniformly distributed noise, almost all fibers are cluttered together, which is obviously a less accurate generation. The exponential and laplace noise however, are completely rubbish. We can distinguish some fibers, but way fewer than in the training data. Also their sizes and shapes are not very satisfying.
 
