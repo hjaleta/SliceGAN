@@ -101,22 +101,20 @@ def calc_wass_loss_beta_2():
     graph_plot(wass_losses, [],  labels, [], 'wass', 'Loss_Graph')
 
 
-def calc_some_loss():
+def calc_wass_loss_beta1():
     beta1_values = [0, .2, .5, .8, .9]
     losses_real = []
-    losses_fake = []
     labels_real = []
-    labels_fake = []
 
     for beta1 in beta1_values:
-        loss_real_log = np.load('Trained_Generators/Hyperparameter_tuning_binary_beta1_' + str(beta1) + '_beta2_0.9/_disc_real_log.npy')
-
+        loss_real_log = np.load('Trained_Generators/Hyperparameter_tuning_binary_beta1_' + str(beta1) + '_beta2_0.9/_wass_log.npy')
         loss_real_log_avrg = np.mean(loss_real_log.reshape(-1, 30), axis=1)
-        #loss_fake_log_avrg = np.mean(loss_fake_log.reshape(-1, 30), axis=1)
 
         losses_real.append(loss_real_log_avrg)
-        #losses_fake.append(loss_fake_log_avrg)
-        labels_real.append('loss_real_beta1_' + str(beta1))
-        labels_fake.append('loss_fake_beta1_' + str(beta1))
+        labels_real.append('wass_loss_beta1_' + str(beta1))
 
-    graph_plot(losses_real, losses_fake,  labels_real, labels_fake, '', 'Loss_Graph')
+    graph_plot(losses_real, [],  labels_real, [], '', 'Loss_Graph')
+
+
+calc_wass_loss_beta1()
+calc_wass_loss_beta_2()
