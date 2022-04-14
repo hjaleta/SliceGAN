@@ -7,6 +7,8 @@ J. IJpma, R. Jense, H. Lindstedt and A. Sharma
 
 Material science is a vast topic of research today, and it’s not very surprising - Almost every product you can think of is made out of some material! One family of materials are the so called composites. Composites are materials that on a microscopical level consist of 2 or more different “pure” materials. One of the more famous composites is carbon fiber materials. Here, fibers of carbon are embedded into a plastic polymer, similar to how concrete can be reinforced with steel bars. The fibers give the material strength, whereas the polymer provides the structure. Carbon fiber materials are used in a vast range of applications, like airplanes and bikes. When studying the properties of these materials, simulations are often used. However, generating the desired 3D structures can be computationally costly. This is where the paper we worked with in this project comes into the picture.
 
+![Figure 1](figures/Carbon_fibre_usage.png?raw=true)
+
 ## Original Paper
 The paper Generating three-dimensional structures from a two-dimensional slice with generative adversarial network-based dimensionality expansion was published in Nature Machine Intelligence in April 2021. In this paper, Steven Kench and Samuel J. Cooper introduced SliceGAN, a GAN that generates 3D micro structures. In general, obtaining 3D training data can be hard. To build a full 3D volume can take a long time with for example spectroscopy. Furthermore, when training a GAN with 3D data the memory consumption can quickly grow large. It is therefore often more convenient to work with 2D images. 
 
@@ -14,6 +16,7 @@ The main purpose of SliceGAN is to resolve this dimensional incompatibility betw
 
 ## Source Data
 The source data is from  (discuss origin and 3D training not being widely available)
+![Figure 2](figures/data.png?raw=true)
 
 ##Preprocessing
 The first step to training any kind of model is applying transformations to the raw data set such that it can be accepted as input by the model. For SliceGAN this process involves trimming the raw data, processing it into a binary format and applying some cleanup on small artifacts within the image.
@@ -28,6 +31,7 @@ The two-dimensional slice carries no contextual information yet. The slice is tr
 The image is pushed through a small image processing pipeline. First, a morphological closing is applied to close gaps between the borders of our structure slice. Second, some noise on the background is removed as this should not contribute to the output. Lastly, some small holes in the objects are closed up to ensure the volume is solid.
 
 Every raw image has now been processed into a square and denoised image and is suitable for training. The final training data, viewed from different angles, can be seen below.
+![Figure 3](figures/slices.png?raw=true)
 
 ##CircleNet
 
@@ -53,7 +57,8 @@ One issue we faced while implementing this is that the real data our network is 
 One thing discussed in the original paper is the noise seed z that we pass to the generator. In the paper, the released code, and all our training instances, a 16 * 4 * 4 * 4 array with random noise was used. The first dimension involves different channels, and the last 3 are spatial. Multiple transpose convolutions are used to go from a spatial extension of 4*4*4 to 64*64*64. These operations are, as normal convolutions, dependent on stride, kernel size and padding, s, k & p. (For more exact details on this, please refer to the original paper.)
 When choosing s < k we impose kernel overlap. This means that the “influential fields” emanating from the different seeds overlap with each other. One can think of it as the opposite of a receptive field. This property is important for the continuity properties of generated fibers. If we instead had k = s, all seeds would have an independent contribution to the volume. One can think of it all seeds generating a 16^3 cube, which we then glue together. Now, when there is overlap, we find better continuity properties.
 Another cool feature that comes with this way of learning continuity, is that we can make bigger forward passes than the model was trained on. When giving a noise seed of different size, for example 16 *9^3 we generate a volume of size 224^3! This can be compared with the original size 64^3 which the network was trained to generate. Both can be seen below. Note that the 64^3 is much more zoomed in.
-
+![Figure 4](figures/forward_pass_slices.png?raw=true)
+![Figure 5](figures/forward_pass_slices2.png?raw=true)
 
 ## Hyperparameter Tuning
 
@@ -65,8 +70,8 @@ Figure x depicts the Discriminator loss for the real and generated samples for e
 
 Figure y shows the Wasserstein loss of the network for the different beta1 and beta2 values. The graphs suggest that especially for beta2 lower values might be better, seeing as they result in a lower loss. However, since the network was only trained for 10 epochs it might be that the higher values of beta2 result in better performance after longer training runs. 
 
-![Figure 1](figures/Graphs_disc_loss_real_fake_hp_tuning.png?raw=true)
-
+![Figure 6](figures/Graphs_disc_loss_real_fake_hp_tuning.png?raw=true)
+![Figure 6](figures/beta12_wass_Loss_Graph.png?raw=true)
 ## References
 
 [1]  S. Kench and S. J. Cooper, Generating three-dimensional structures from a
