@@ -74,12 +74,13 @@ We trained the GAN with beta1 values [0, 0.2, 0.5, 0.8, 0.9] keeping beta2 fixed
 Figure 6 depicts the Discriminator loss for the real and generated samples for each of the beta values. The graph shows the average of every thirty samples for clarity, since the original losses are too noisy to make a clear comparison.
 
 ![Figure 6](figures/Graphs_disc_loss_real_fake_hp_tuning.png?raw=true)
-*Figure 6. The Discriminator loss for the real and generated images. *
+*Figure 6. The Discriminator loss for the real and generated images. There does not seem to be a strong deviation in results due to differences in beta1 (left). 
+For beta2, a higher value seems preferable (right)*
 
 Figure 7 shows the Wasserstein loss of the network for the different beta1 and beta2 values. The graphs suggest that especially for beta2 lower values might be better, seeing as they result in a lower loss. However, since the network was only trained for 10 epochs it might be that the higher values of beta2 result in better performance after longer training runs. 
 
-![Figure 6](figures/beta12_wass_Loss_Graph.png?raw=true)
-*Figure 7.* 
+![Figure 6](figures/beta12_wass_Loss_Graph.png?)
+*Figure 7. The Wasserstein loss for the beta1 values (left) and beta2 values (right)* 
 ## References
 
 [1]  S. Kench and S. J. Cooper, Generating three-dimensional structures from a
