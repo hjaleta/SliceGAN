@@ -7,6 +7,7 @@ J. IJpma, R. Jense, H. Lindstedt and A. Sharma
 
 Material science is a vast topic of research today, and it’s not very surprising - Almost every product you can think of is made out of some material! One family of materials are the so called composites. Composites are materials that on a microscopical level consist of 2 or more different “pure” materials. One of the more famous composites is carbon fiber materials. Here, fibers of carbon are embedded into a plastic polymer, similar to how concrete can be reinforced with steel bars. The fibers give the material strength, whereas the polymer provides the structure. Carbon fiber materials are used in a vast range of applications, like airplanes and bikes. When studying the properties of these materials, simulations are often used. However, generating the desired 3D structures can be computationally costly. This is where the paper we worked with in this project comes into the picture.
 
+[//]: # (a)
 ![Figure 1](figures/Carbon_fibre_usage.png?raw=true)
 *Figure 1. Example of the many uses of carbon fiber*
 ## Original Paper
