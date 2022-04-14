@@ -70,19 +70,30 @@ Another cool feature that comes with this way of learning continuity, is that we
 ## Hyperparameter Tuning
 
 SliceGAN has many hyperparameters, from the amount of layers, the type of loss function used to the learning rate for either the Generator or one of the Discriminators. In this blogpost we focus on three of them: the beta1 and beta2 parameters for the adam optimizer and the noise distributions which are used as seed for the Generator.  
-The reason for looking further into the beta1 and beta2 values for the Adam optimizer is that the implementation from the original paper uses 0 as value for beta1. This means that the network is not using the bias in the  first moment estimate. This is remarkable since the default is to use .9 for beta1 and .99 for beta2 as recommended by the paper that introduced Adam. [reference]
-We trained the GAN with beta1 values [0, 0.2, 0.5, 0.8, 0.9] keeping beta2 fixed at 0.9 (as was used in the paper) and for beta2 we used the values [0.1, 0.3, 0.5, 0.9] keeping beta1 fixed as 0.
+The reason for looking further into the beta1 and beta2 values for the Adam optimizer is that the implementation from the original paper uses 0 as value for beta1. This means that the network is not using the bias in the  first moment estimate. This is remarkable since the default is to use .9 for beta1 and .99 for beta2 as recommended by the paper that introduced Adam. [1]
+We trained the GAN with beta1 values [0, 0.2, 0.5, 0.8, 0.9] keeping beta2 fixed at 0.9 (as was used in the paper) and for beta2 we used the values [0.1, 0.3, 0.5, 0.9] keeping beta1 fixed at 0.
 
-Figure 6 depicts the Discriminator loss for the real and generated samples for each of the beta values. The graph shows the average of every thirty samples for clarity, since the original losses are too noisy to make a clear comparison.
 
-![Figure 6](figures/Graphs_disc_loss_real_fake_hp_tuning.png?raw=true)
-*Figure 6. The Discriminator loss for the real and generated images. There does not seem to be a strong deviation in results due to differences in beta1 (left). 
-For beta2, a higher value seems preferable (right)*
-
-Figure 7 shows the Wasserstein loss of the network for the different beta1 and beta2 values. The graphs suggest that especially for beta2 lower values might be better, seeing as they result in a lower loss. However, since the network was only trained for 10 epochs it might be that the higher values of beta2 result in better performance after longer training runs. 
+Figure 6 shows the Wasserstein loss of the network for the different beta1 and beta2 values. The graphs suggest that especially for beta2 lower values might be better, seeing as they result in a lower loss. However, since the network was only trained for 10 epochs it might be that the higher values of beta2 result in better performance after longer training runs. 
+There seems to be no clear indication as to what the best value might be for beta1.
 
 ![Figure 6](figures/beta12_wass_Loss_Graph.png?)
-*Figure 7. The Wasserstein loss for the beta1 values (left) and beta2 values (right)* 
+*Figure 6. The Wasserstein loss for the beta1 values (left) shows no clear indication as to why a beta1 value of 0 would be preferable.
+The beta2 values (right) seem to indicate that lower values of beta2 might work better for this network* 
+
+## Different Noise Distributions
+Another thing that we examined was how the performance of the GAN depends on the noise distributions that we use when sampling z. When not stated otherwise, for example in the training of the CircleNet and the hyperparameter tuning, we have used gaussian noise from a normal distribution. In this part, we wanted to see how the network learns when using other sources of noise. The distributions we used were:
+* Cauchy
+* Laplace
+* Uniform
+* Exponential
+
+Different generators were hence trained on these distributions, and then evaluated on the same. The different results can be seen below:
+
+
+The Cauchy distribution is the most well behaved, some fibers are properly separated and others more cluttered together. With the uniformly distributed noise, almost all fibers are cluttered together, which is obviously a less accurate generation. The exponential and laplace noise however, are completely rubbish. We can distinguish some fibers, but way fewer than in the training data. Also their sizes and shapes are not very satisfying.
+
+
 ## References
 
 [1]  Kench, S., Cooper, S.J. Generating three-dimensional structures from a two-dimensional slice with generative adversarial network-based dimensionality expansion. Nat Mach Intell 3, 299–305 (2021), https://doi.org/10.1038/s42256-021-00322-1
