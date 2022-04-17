@@ -1,4 +1,0 @@
-Students
-Normal 
-uniform
-Laplace
