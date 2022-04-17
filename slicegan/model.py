@@ -20,7 +20,6 @@ noise_distributions = {
 
 }
 
-
 def train(pth, imtype, datatype, real_data, Disc, Gen, nc, l, nz, sf, lz, num_epochs, CircNet, use_Circ = 0, noise_type = "normal", sub_images = 32*900, beta1=0, beta2=0.9):
     """
     train the generator
