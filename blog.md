@@ -1,7 +1,8 @@
 # Group 81 Blog Post
 # Generating three-dimensional structures from a two-dimensional slice with generative adversarial network-based dimensionality expansion
 
-J. IJpma -4477103, R. Jense -4565541, H. Lindstedt -* and A. Sharma -5579139
+J. IJpma -4477103, R. Jense -4565541, H. Lindstedt -5621313 and A. Sharma -5579139
+
 D.J.IJpma@student.tudelft.nl, R.E.Jense@student.tudelft.nl, H.L.M.Lindstedt@student.tudelft.nl, A.Sharma-53@student.tudelft.nl
 
 
@@ -60,7 +61,7 @@ Notice that unlike the loss used in Circle Training, the “Circularity Loss” 
 One issue we faced while implementing this is that the real data our network is trained on also contains a lot of artifacts and distortions that affects our learning capability for  modular nodes with high circularity. The biggest problem here is that the subsections of these structures contain a lot of small noise artifacts and a lot of our circular fiber cross-sections are connected to each other due to some inherent error in the conversion from grayscale to binary. We apply water-shedding to mitigate these issues and compare our results of the CircleNet before and after water-shedding to compare the efficacy of our pre-processing measure. 
 
 ## A Closer Look on the Forward Pass
-One thing discussed in the original paper is the noise seed z that we pass to the generator. In the paper, the released code, and all our training instances, a 16 * 4 * 4 * 4 array with random noise was used. The first dimension involves different channels, and the last 3 are spatial. Multiple transpose convolutions are used to go from a spatial extension of 4*4*4 to 64*64*64. These operations are, as normal convolutions, dependent on stride, kernel size and padding, s, k & p. (For more exact details on this, please refer to the original paper.)
+One thing discussed in the original paper is the noise seed z that we pass to the generator. In the paper, the released code, and all our training instances, a 16 * 4 * 4 * 4 array with random noise was used. The first dimension involves different channels, and the last 3 are spatial. Multiple transpose convolutions are used to go from a spatial extension of 4 * 4 * 4 to 64 * 64 * 64. These operations are, as normal convolutions, dependent on stride, kernel size and padding, s, k & p. (For more exact details on this, please refer to the original paper.)
 When choosing s < k we impose kernel overlap. This means that the “influential fields” emanating from the different seeds overlap with each other. One can think of it as the opposite of a receptive field. This property is important for the continuity properties of generated fibers. If we instead had k = s, all seeds would have an independent contribution to the volume. One can think of it all seeds generating a 16^3 cube, which we then glue together. Now, when there is overlap, we find better continuity properties.
 Another cool feature that comes with this way of learning continuity, is that we can make bigger forward passes than the model was trained on. When giving a noise seed of different size, for example 16 *9^3 we generate a volume of size 224^3! This can be compared with the original size 64^3 which the network was trained to generate. Both can be seen below. Note that the 64^3 is much more zoomed in.
 
@@ -73,7 +74,7 @@ Another cool feature that comes with this way of learning continuity, is that we
 ## Hyperparameter Tuning
 
 SliceGAN has many hyperparameters, from the amount of layers, the type of loss function used to the learning rate for either the Generator or one of the Discriminators. In this blogpost we focus on three of them: the beta1 and beta2 parameters for the adam optimizer and the noise distributions which are used as seed for the Generator.  
-The reason for looking further into the beta1 and beta2 values for the Adam optimizer is that the implementation from the original paper uses 0 as value for beta1. This means that the network is not using the bias in the  first moment estimate. This is remarkable since the default is to use .9 for beta1 and .99 for beta2 as recommended by the paper that introduced Adam. [reference]
+The reason for looking further into the beta1 and beta2 values for the Adam optimizer is that the implementation from the original paper uses 0 as value for beta1. This means that the network is not using the bias in the  first moment estimate. This is remarkable since the default is to use .9 for beta1 and .99 for beta2 as recommended by the paper that introduced Adam. [3]
 We trained the GAN with beta1 values [0, 0.2, 0.5, 0.8, 0.9] keeping beta2 fixed at 0.9 (as was used in the paper) and for beta2 we used the values [0.1, 0.3, 0.5, 0.9] keeping beta1 fixed as 0.
 
 Figure 6 shows the Wasserstein loss of the network for the different beta1 and beta2 values. The graphs suggest that especially for beta2 lower values might be better, seeing as they result in a lower loss. However, since the network was only trained for 10 epochs it might be that the higher values of beta2 result in better performance after longer training runs. 
@@ -92,9 +93,19 @@ Another thing that we examined was how the performance of the GAN depends on the
 Different generators were hence trained on these distributions, and then evaluated on the same. The different results can be seen below:
 
 ![Figure 7](figures/noise1.png?raw=true)
-![Figure 7](figures/noise2.png?raw=true)
-![Figure 7](figures/noise3.png?raw=true)
-![Figure 7](figures/noise4.png?raw=true)
+*Figure 7. The resulting cross-sections generated by the generator after sampling the random variables for the initial noise seed from a Cauchy Distribution*
+
+
+![Figure 8](figures/noise2.png?raw=true)
+*Figure 8. The resulting cross-sections generated by the generator after sampling the random variables for the initial noise seed from a Laplace Distribution*
+
+
+![Figure 9](figures/noise3.png?raw=true)
+*Figure 9. The resulting cross-sections generated by the generator after sampling the random variables for the initial noise seed from a Uniform Distribution*
+
+
+![Figure 10](figures/noise4.png?raw=true)
+*Figure 10. The resulting cross-sections generated by the generator after sampling the random variables for the initial noise seed from a Exponential Distribution*
 
 
 

@@ -49,19 +49,6 @@ def show_random_slices(volume, figpath, fig_title):
 
         ax[i].imshow(cross_sect)
         ax[i].set_title(title)
-        # ax[i].tick_params(
-        #     axis='both',          # changes apply to the x-axis
-        #     which='both',      # both major and minor ticks are affected
-        #     bottom=False,      # ticks along the bottom edge are off
-        #     top=False,         # ticks along the top edge are off
-        #     labelbottom=False) # labels along the bottom edge are off
-        
-        # ax[i].tick_params(
-        #     axis='y',          # changes apply to the x-axis
-        #     which='both',      # both major and minor ticks are affected
-        #     bottom=False,      # ticks along the bottom edge are off
-        #     top=False,         # ticks along the top edge are off
-        #     labelbottom=False) # labels along the bottom e
         
         ax[i].tick_params(
             axis='both',          # changes apply to the x-axis
@@ -69,8 +56,6 @@ def show_random_slices(volume, figpath, fig_title):
             bottom=False, top= False, left = False, right = False,      # ticks along the bottom edge are off
             labelbottom=False, labeltop= False, 
             labelleft = False, labelright = False) # labels along the bottom e
-        # ax.imshow(cross_sect)
-        # ax.set_title(title)
     fig.suptitle(fig_title)
     fig.savefig(figpath)
 
