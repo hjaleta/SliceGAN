@@ -1,24 +1,6 @@
-# SliceGAN 
+# SliceGAN Revisited - Carbon Fibers
 
-To use SliceGAN open run_slicegan and edit information as requested. SliceGAN requires a single 2D training image of an isotropic microstructure, or three 2D images taken at perpendicular angles of an anisotropic microstructure. Images can be colour, grayscale or n-phase.
+This project revolved around reproducing [this paper](https://doi.org/10.1038/s42256-021-00322-1) presented in Nature Machine Intelligence. The original code repository can be found [here](https://github.com/stke9/SliceGAN).
 
-Use 'python run_slicegan 1' to train a new generator or 'python run_slicegan 0' to generate and save an example .tif file
-
-### Development
-
-If you are interested in trying new architectures, see the networks.py file
-
-To adjust the training parameters or algorithm, see train.py
-
-To add a new preprocessing method e.g for a different training datatype, see preproccessing.py.
-
-### Results
-
-![](images/SliceGAN_results.png)
-
-### Versions
-
-v1.1 release: [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.4399114.svg)](https://doi.org/10.5281/zenodo.4399114)
-
-v1.0 release: [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.4319988.svg)](https://doi.org/10.5281/zenodo.4319988)
+The main idea is to generate microstructures with a GAN (*Generative Adverserial Network*). The original paper tried the GAN on different data, whereas we only looked at carbon fibers. The project involved some data pre-processing, and we also axtended the algorithm a bit. One extension was the inclusion of a PINN (*Physically Informed Neural Networks*) term in the loss function. We also examined the possibility of sampling the noise seeds from different random distributions. Furthermore some hyperparameter testing was done. More details can be read in the wiki of the repository, or in the poster pdf file.
 
